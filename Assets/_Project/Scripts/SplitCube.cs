@@ -24,7 +24,6 @@ public class SplitCube : MonoBehaviour, IClickable
     private const float Half = 0.5f;
     private const float MinMass = 0.01f;
 
-    // --- цвет без создания новых материалов ---
     private static readonly int ColorId = Shader.PropertyToID("_BaseColor");
     private static MaterialPropertyBlock _mpb;
 
@@ -61,7 +60,7 @@ public class SplitCube : MonoBehaviour, IClickable
         Vector3 parentPos = t.position;
         Vector3 childScale = t.localScale * Half;
 
-        float massFactor = Half * Half * Half; 
+        float massFactor = Half * Half * Half;
 
         for (int i = 0; i < count; i++)
         {
@@ -103,30 +102,23 @@ public class SplitCube : MonoBehaviour, IClickable
     {
         Vector3 center = transform.position;
 
-        // “Меньше куб” => “больше радиус и сила”
-        // Берём масштаб по X (предполагаем равномерный scale)
         float size = Mathf.Max(0.001f, transform.localScale.x);
 
-        // Нормируем: стартовый куб (scale=1) => множитель 1
-        // cube smaller => multiplier grows
         float sizeMultiplier = 1f / size;
 
         float radius = baseFailExplosionRadius * sizeMultiplier;
         float force = baseFailExplosionForce * sizeMultiplier;
 
-        // Собираем соседей
         Collider[] cols = Physics.OverlapSphere(center, radius, ~0, QueryTriggerInteraction.Ignore);
 
         for (int i = 0; i < cols.Length; i++)
         {
-            // Не толкаем самого себя (или его коллайдер)
             if (cols[i].gameObject == gameObject)
                 continue;
 
             if (!cols[i].TryGetComponent<Rigidbody>(out var rb))
                 continue;
 
-            // Направление от центра взрыва к объекту
             Vector3 toBody = rb.worldCenterOfMass - center;
             float dist = toBody.magnitude;
 
@@ -135,12 +127,9 @@ public class SplitCube : MonoBehaviour, IClickable
 
             Vector3 dir = toBody / dist;
 
-            // Затухание силы по расстоянию:
-            // ближе => сильнее, дальше => слабее
             float t = Mathf.Clamp01(dist / radius);
             float attenuation = Mathf.Max(minDistanceAttenuation, 1f - t); // линейное падение
 
-            // Импульс (мгновенный толчок)
             rb.AddForce(dir * ( force * attenuation ), ForceMode.Impulse);
         }
     }

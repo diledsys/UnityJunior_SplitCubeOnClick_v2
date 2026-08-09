@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class MouseClickRaycaster : MonoBehaviour
@@ -13,12 +12,13 @@ public class MouseClickRaycaster : MonoBehaviour
     [SerializeField] private bool useLineRenderer = false;
     [SerializeField] private float lineTime = 0.06f;
 
+    private const int LeftMouseButton = 0;
     private const int RayLinePointCount = 2;
+
+    private readonly RaycastHit[] _hits = new RaycastHit[64];
 
     private LineRenderer _lineRenderer;
     private float _lineTimer;
-
-    private readonly RaycastHit[] _hits = new RaycastHit[64];
 
     private void Awake()
     {
@@ -26,23 +26,59 @@ public class MouseClickRaycaster : MonoBehaviour
             targetCamera = Camera.main;
 
         if (useLineRenderer)
-        {
-            _lineRenderer = gameObject.GetComponent<LineRenderer>();
-            if (_lineRenderer == null)
-                _lineRenderer = gameObject.AddComponent<LineRenderer>();
-            _lineRenderer.positionCount = RayLinePointCount;
-            _lineRenderer.enabled = false;
-            _lineRenderer.useWorldSpace = true;
-        }
+            InitializeLineRenderer();
     }
 
     private void Update()
     {
-        if (!Input.GetMouseButtonDown(0))
+        if (!Input.GetMouseButtonDown(LeftMouseButton))
             return;
-       
+
+        if (targetCamera == null)
+            return;
+
         Ray ray = targetCamera.ScreenPointToRay(Input.mousePosition);
 
+        if (!TryGetNearestHit(ray, out RaycastHit hit))
+        {
+            ShowDebugRay(ray.origin, ray.origin + ray.direction * maxDistance);
+            return;
+        }
+
+        if (TryGetClickable(hit.collider, out IClickable clickable))
+            clickable.OnClick();
+
+        ShowDebugRay(ray.origin, hit.point);
+    }
+
+    private void LateUpdate()
+    {
+        if (_lineRenderer == null)
+            return;
+
+        if (_lineTimer <= 0f)
+            return;
+
+        _lineTimer -= Time.deltaTime;
+
+        if (_lineTimer <= 0f)
+            _lineRenderer.enabled = false;
+    }
+
+    private void InitializeLineRenderer()
+    {
+        _lineRenderer = GetComponent<LineRenderer>();
+
+        if (_lineRenderer == null)
+            _lineRenderer = gameObject.AddComponent<LineRenderer>();
+
+        _lineRenderer.positionCount = RayLinePointCount;
+        _lineRenderer.enabled = false;
+        _lineRenderer.useWorldSpace = true;
+    }
+
+    private bool TryGetNearestHit(Ray ray, out RaycastHit nearestHit)
+    {
         int count = Physics.RaycastNonAlloc(
             ray,
             _hits,
@@ -51,72 +87,47 @@ public class MouseClickRaycaster : MonoBehaviour
             QueryTriggerInteraction.Ignore
         );
 
-        if (count == 0)
-        {
-            ShowLine(ray.origin, ray.origin + ray.direction * maxDistance);
-            return;
-        }
+        nearestHit = default;
 
-        int bestIndex = -1;
-        float bestDist = float.PositiveInfinity;
+        if (count == 0)
+            return false;
+
+        float nearestDistance = float.PositiveInfinity;
 
         for (int i = 0; i < count; i++)
         {
-            float d = _hits[i].distance;
-            if (d < bestDist)
-            {
-                bestDist = d;
-                bestIndex = i;
-            }
+            if (_hits[i].distance >= nearestDistance)
+                continue;
+
+            nearestDistance = _hits[i].distance;
+            nearestHit = _hits[i];
         }
 
-        Vector3 endPoint = ray.origin + ray.direction * maxDistance;
-
-        if (bestIndex >= 0)
-        {
-            endPoint = _hits[bestIndex].point;
-
-            if (_hits[bestIndex].collider.TryGetComponent<IClickable>(out var clickable))
-            {
-                clickable.OnClick();
-            }
-            else
-            {
-                var t = _hits[bestIndex].collider.transform;
-                if (t.TryGetComponent<IClickable>(out clickable))
-                    clickable.OnClick();
-                else if (t.parent != null && t.parent.TryGetComponent<IClickable>(out clickable))
-                    clickable.OnClick();
-            }
-        }
-
-
-        ShowLine(ray.origin, endPoint);
+        return true;
     }
 
-    private void LateUpdate()
+    private bool TryGetClickable(Collider collider, out IClickable clickable)
     {
-        if (_lineRenderer == null)
-            return;
+        if (collider.TryGetComponent(out clickable))
+            return true;
 
-        if (_lineTimer > 0f)
-        {
-            _lineTimer -= Time.deltaTime;
-            if (_lineTimer <= 0f)
-                _lineRenderer.enabled = false;
-        }
+        clickable = collider.GetComponentInParent<IClickable>();
+
+        return clickable != null;
     }
 
-    private void ShowLine(Vector3 startPoint, Vector3 endPoint)
+    private void ShowDebugRay(Vector3 startPoint, Vector3 endPoint)
     {
+        if (drawDebugRay)
+            Debug.DrawLine(startPoint, endPoint, Color.red, lineTime);
+
         if (_lineRenderer == null)
             return;
 
         _lineRenderer.enabled = true;
         _lineRenderer.SetPosition(0, startPoint);
         _lineRenderer.SetPosition(1, endPoint);
+
         _lineTimer = lineTime;
     }
-
-
 }
