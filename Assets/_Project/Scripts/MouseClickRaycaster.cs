@@ -15,7 +15,7 @@ public class MouseClickRaycaster : MonoBehaviour
     private const int LeftMouseButton = 0;
     private const int RayLinePointCount = 2;
 
-    private readonly RaycastHit[] _hits = new RaycastHit[64];
+    private readonly RaycastHit[] _raycastHits = new RaycastHit[64];
 
     private LineRenderer _lineRenderer;
     private float _lineTimer;
@@ -79,9 +79,9 @@ public class MouseClickRaycaster : MonoBehaviour
 
     private bool TryGetNearestHit(Ray ray, out RaycastHit nearestHit)
     {
-        int count = Physics.RaycastNonAlloc(
+        int hitCount = Physics.RaycastNonAlloc(
             ray,
-            _hits,
+            _raycastHits,
             maxDistance,
             raycastLayers,
             QueryTriggerInteraction.Ignore
@@ -89,18 +89,18 @@ public class MouseClickRaycaster : MonoBehaviour
 
         nearestHit = default;
 
-        if (count == 0)
+        if (hitCount == 0)
             return false;
 
         float nearestDistance = float.PositiveInfinity;
 
-        for (int i = 0; i < count; i++)
+        for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
         {
-            if (_hits[i].distance >= nearestDistance)
+            if (_raycastHits[hitIndex].distance >= nearestDistance)
                 continue;
 
-            nearestDistance = _hits[i].distance;
-            nearestHit = _hits[i];
+            nearestDistance = _raycastHits[hitIndex].distance;
+            nearestHit = _raycastHits[hitIndex];
         }
 
         return true;

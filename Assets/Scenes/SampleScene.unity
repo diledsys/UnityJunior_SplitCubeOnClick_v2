@@ -582,19 +582,12 @@ MonoBehaviour:
   maxChildren: 25
   generation: 0
   spawnJitter: 0.15
-  childExplosionForce: 1
-  childExplosionRadius: 200
-  childExplosionUpwards: 0.4
-  explosionLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
+  explosionForce: 15
+  explosionRadius: 20
+  explosionUpwards: 2
   baseFailExplosionForce: 8
   baseFailExplosionRadius: 100
-  explosionUpwards: 0.5
-  waveDuration: 0.2
-  waveSteps: 12
-  logExplosionDebug: 1
-  drawExplosionGizmo: 1
+  minDistanceAttenuation: 0.15
 --- !u!65 &1309785810
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -752,19 +745,12 @@ MonoBehaviour:
   maxChildren: 25
   generation: 0
   spawnJitter: 0.15
-  childExplosionForce: 1
-  childExplosionRadius: 200
-  childExplosionUpwards: 0.4
-  explosionLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
+  explosionForce: 15
+  explosionRadius: 20
+  explosionUpwards: 2
   baseFailExplosionForce: 8
   baseFailExplosionRadius: 100
-  explosionUpwards: 0.5
-  waveDuration: 0.2
-  waveSteps: 12
-  logExplosionDebug: 1
-  drawExplosionGizmo: 1
+  minDistanceAttenuation: 0.15
 --- !u!65 &1532503275
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -974,19 +960,12 @@ MonoBehaviour:
   maxChildren: 25
   generation: 0
   spawnJitter: 0.15
-  childExplosionForce: 1
-  childExplosionRadius: 200
-  childExplosionUpwards: 0.4
-  explosionLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
+  explosionForce: 15
+  explosionRadius: 20
+  explosionUpwards: 2
   baseFailExplosionForce: 8
   baseFailExplosionRadius: 100
-  explosionUpwards: 0.5
-  waveDuration: 0.2
-  waveSteps: 12
-  logExplosionDebug: 1
-  drawExplosionGizmo: 1
+  minDistanceAttenuation: 0.15
 --- !u!65 &1742843011
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1237,19 +1216,12 @@ MonoBehaviour:
   maxChildren: 25
   generation: 0
   spawnJitter: 0.15
-  childExplosionForce: 1
-  childExplosionRadius: 200
-  childExplosionUpwards: 0.4
-  explosionLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
+  explosionForce: 15
+  explosionRadius: 20
+  explosionUpwards: 2
   baseFailExplosionForce: 8
   baseFailExplosionRadius: 100
-  explosionUpwards: 0.5
-  waveDuration: 0.2
-  waveSteps: 12
-  logExplosionDebug: 1
-  drawExplosionGizmo: 1
+  minDistanceAttenuation: 0.15
 --- !u!54 &2129567064
 Rigidbody:
   m_ObjectHideFlags: 0
